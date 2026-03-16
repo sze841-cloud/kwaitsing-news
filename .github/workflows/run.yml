@@ -1,0 +1,23 @@
+name: News Update
+on:
+  schedule:
+    - cron: '0 * * * *' # 每小時運行
+  workflow_dispatch:      # 允許你手動按按鈕執行
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python main.py
+      - run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html url_cache.json
+          git commit -m "Update" || exit 0
+          git push

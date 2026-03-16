@@ -1,0 +1,35 @@
+name: Hourly News Update
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 每小時整點執行一次
+  workflow_dispatch:      # 允許手動點擊按鈕執行
+
+permissions:
+  contents: write         # 允許機器人修改檔案並上傳
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 檢查程式碼
+        uses: actions/checkout@v3
+
+      - name: 設定 Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 安裝依賴庫
+        run: pip install -r requirements.txt
+
+      - name: 執行抓取程式
+        run: python main.py
+
+      - name: 提交並推送更新
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html url_cache.json
+          git commit -m "Update news: $(date)" || exit 0
+          git push
